@@ -10,11 +10,13 @@ import tp1.api.service.rest.RestFiles;
 import tp1.clients.RestClient;
 import tp1.server.Discovery;
 
+import java.util.logging.Logger;
 import java.net.URI;
 import java.util.List;
 
 public class RestDirectoryClient extends RestClient implements RestDirectory {
 
+    private static final Logger Log = Logger.getLogger(RestDirectoryClient.class.getName());
 
     final WebTarget target;
 
@@ -31,16 +33,10 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
 
     private FileInfo clt_writeFile(String filename, byte[] data, String userId, String password) {
 
-        FileInfo fileInfo = new FileInfo();
-        fileInfo.setOwner(userId);
-        fileInfo.setFilename(filename);
-        String fileId = filename + "-" + userId;
-        fileInfo.setFileURL(RestFiles.PATH + "/" + fileId);
-
         Response r = target.path(userId).path(filename)
                     .queryParam("password", password).request()
-                    .accept(MediaType.APPLICATION_OCTET_STREAM)
-                    .post(Entity.entity(fileInfo, MediaType.APPLICATION_JSON));
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
         if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
             return r.readEntity(FileInfo.class);

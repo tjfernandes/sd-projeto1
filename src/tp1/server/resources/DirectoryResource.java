@@ -2,18 +2,12 @@ package tp1.server.resources;
 
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import tp1.api.FileInfo;
 import tp1.api.User;
 import tp1.api.service.rest.RestDirectory;
 import tp1.api.service.rest.RestFiles;
-import tp1.server.Discovery;
-
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +28,7 @@ public class DirectoryResource implements RestDirectory {
 
     @Override
     public FileInfo writeFile(String filename, byte[] data, String userId, String password) {
+        Log.info("Writing " + filename + " of user " + userId + "...");
 
         User u = usersResource.getUser(userId, password);
 
@@ -67,7 +62,7 @@ public class DirectoryResource implements RestDirectory {
             e.printStackTrace();
         }
             
-        return fileInfo;
+        return null;
     }
 
     @Override

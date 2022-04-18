@@ -1,3 +1,5 @@
+package tp1.clients;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,14 +22,10 @@ public class RestFilesClient extends RestClient implements RestFiles {
 
     @Override
     public void writeFile(String fileId, byte[] data, String token) throws IOException {
-	
-        File file = new File(target.path(fileId).getUri());
-		FileOutputStream fStream = new FileOutputStream(file);
-        fStream.write(data);
 
         Response r = target.path(fileId).request()
-					.accept(MediaType.APPLICATION_OCTET_STREAM)
-					.post(Entity.entity(file, MediaType.APPLICATION_JSON));
+					.accept(MediaType.APPLICATION_JSON)
+					.post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
 		if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
             System.out.println("File written in server: " + target.path(fileId).getUri());

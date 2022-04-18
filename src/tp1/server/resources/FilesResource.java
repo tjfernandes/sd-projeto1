@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.swing.plaf.FileChooserUI;
-
 public class FilesResource implements RestFiles {
 
     private static final Logger Log = Logger.getLogger(FilesResource.class.getName());

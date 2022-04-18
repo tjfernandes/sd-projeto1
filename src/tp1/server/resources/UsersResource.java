@@ -15,11 +15,12 @@ import tp1.api.service.rest.RestUsers;
 @Singleton
 public class UsersResource implements RestUsers {
 
-	private final Map<String,User> users = new HashMap<>();
+	public Map<String,User> users;
 
 	private static final Logger Log = Logger.getLogger(UsersResource.class.getName());
 	
 	public UsersResource() {
+		users = new HashMap<>();
 	}
 		
 	@Override
