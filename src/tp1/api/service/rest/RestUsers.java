@@ -18,9 +18,6 @@ import tp1.api.User;
 public interface RestUsers {
 
 	static final String PATH="/users";
-	public static final String QUERY = "query";
-	public static final String USER_ID = "userId";
-	public static final String PASSWORD = "password";
 
 	/**
 	 * Creates a new user.
@@ -46,9 +43,9 @@ public interface RestUsers {
 	 *         404 if no user exists with the provided userId
 	 */
 	@GET
-	@Path("/{" + USER_ID + "}")
+	@Path("/{userId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	User getUser(@PathParam(USER_ID) String userId, @QueryParam(PASSWORD) String password);
+	User getUser(@PathParam("userId") String userId, @QueryParam("password") String password);
 	
 	/**
 	 * Modifies the information of a user. Values of null in any field of the user will be 
@@ -64,10 +61,10 @@ public interface RestUsers {
 	 *         400 otherwise.
 	 */
 	@PUT
-	@Path("/{" + USER_ID + "}")
+	@Path("/{userId}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	User updateUser(@PathParam(USER_ID) String userId, @QueryParam(PASSWORD) String password, User user);
+	User updateUser(@PathParam("userId") String userId, @QueryParam("password") String password, User user);
 	
 	/**
 	 * Deletes the user identified by userId. The files owned by the user should be eventually removed (asynchronous
@@ -81,9 +78,9 @@ public interface RestUsers {
 	 *         404 if no user exists with the provided userId
 	 */
 	@DELETE
-	@Path("/{" + USER_ID + "}")
+	@Path("/{userId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	User deleteUser(@PathParam(USER_ID) String userId, @QueryParam(PASSWORD) String password);
+	User deleteUser(@PathParam("userId") String userId, @QueryParam("password") String password);
 	
 	/**
 	 * Returns the list of users for which the pattern is a substring of the name (of the user), case-insensitive.
@@ -95,5 +92,5 @@ public interface RestUsers {
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	List<User> searchUsers(@QueryParam(QUERY) String pattern);
+	List<User> searchUsers(@QueryParam("query") String pattern);
 }

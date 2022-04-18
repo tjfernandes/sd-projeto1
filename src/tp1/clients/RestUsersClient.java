@@ -62,7 +62,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 
 	private User clt_getUser( String userId, String password ) {
 		Response r = target.path(userId)
-				.queryParam(RestUsers.PASSWORD, password).request()
+				.queryParam("password", password).request()
 				.accept(MediaType.APPLICATION_JSON)
 				.get();
 
@@ -83,7 +83,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 
 		if (newUserId == null || newPw == null || newEmail == null || newName == null) {
 			r = target.path(userId)
-					.queryParam(RestUsers.PASSWORD, password).request()
+					.queryParam("password", password).request()
 					.accept(MediaType.APPLICATION_JSON)
 					.get();
 
@@ -101,7 +101,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 		}
 
 		r = target.path(userId)
-				.queryParam(RestUsers.PASSWORD, password).request()
+				.queryParam("password", password).request()
 				.accept(MediaType.APPLICATION_JSON)
 				.put(Entity.entity(user, MediaType.APPLICATION_JSON));
 
@@ -115,7 +115,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 
 	private User clt_deleteUser ( String userId, String password ) {
 		Response r = target.path(userId)
-				.queryParam(RestUsers.PASSWORD, password).request()
+				.queryParam("password", password).request()
 				.accept(MediaType.APPLICATION_JSON)
 				.delete();
 
@@ -129,7 +129,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 	
 	private List<User> clt_searchUsers(String pattern) {
 		Response r = target
-				.queryParam(QUERY, pattern)
+				.queryParam("query", pattern)
 				.request()
 				.accept(MediaType.APPLICATION_JSON)
 				.get();

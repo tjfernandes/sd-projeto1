@@ -11,6 +11,9 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.core.MediaType;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 @Path(RestFiles.PATH)
 public interface RestFiles {
 
@@ -32,7 +35,7 @@ public interface RestFiles {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
 	void writeFile(@PathParam("fileId") String fileId, byte[] data, 
-			@QueryParam("token") @DefaultValue("") String token);
+			@QueryParam("token") @DefaultValue("") String token) throws IOException;
 
 	/**
 	 * Delete an existing file.

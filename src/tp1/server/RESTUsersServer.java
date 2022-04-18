@@ -1,6 +1,7 @@
 package tp1.server;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +22,7 @@ public class RESTUsersServer {
 	}
 	
 	public static final int PORT = 8080;
-	public static final String SERVICE = "UsersServer";
+	public static final String SERVICE = "users";
 	private static final String SERVER_URI_FMT = "http://%s:%s/rest";
 	
 	public static void main(String[] args) {
@@ -40,6 +41,10 @@ public class RESTUsersServer {
 		Log.info(String.format("%s Server ready @ %s\n",  SERVICE, serverURI));
 		
 		//More code can be executed here...
+
+		Discovery discovery = new Discovery();
+		discovery.start(SERVICE, serverURI);
+
 
 
 		} catch( Exception e) {
