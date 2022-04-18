@@ -6,13 +6,15 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import tp1.api.FileInfo;
 import tp1.api.service.rest.RestDirectory;
+import tp1.api.service.rest.RestFiles;
+import tp1.clients.RestClient;
+import tp1.server.Discovery;
 
 import java.net.URI;
 import java.util.List;
 
 public class RestDirectoryClient extends RestClient implements RestDirectory {
 
-    final RestFilesClient filesClient = new RestFilesClient();
 
     final WebTarget target;
 
@@ -29,17 +31,23 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
 
     private FileInfo clt_writeFile(String filename, byte[] data, String userId, String password) {
 
-        URI fileUri = target.path(userId).path(filename).getUri();
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setOwner(userId);
+        fileInfo.setFilename(filename);
+        String fileId = filename + "-" + userId;
+        fileInfo.setFileURL(RestFiles.PATH + "/" + fileId);
 
         Response r = target.path(userId).path(filename)
-                .queryParam("password", password).request()
-                .accept(MediaType.APPLICATION_JSON)
-                .post();
+                    .queryParam("password", password).request()
+                    .accept(MediaType.APPLICATION_OCTET_STREAM)
+                    .post(Entity.entity(fileInfo, MediaType.APPLICATION_JSON));
 
         if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
             return r.readEntity(FileInfo.class);
         else
             System.out.println("Error, HTTP error status: " + r.getStatus() );
+
+        return null;
     }
 
     @Override

@@ -45,7 +45,7 @@ public class Discovery {
 	// Stores the information about different servers
 	Map<String, List<URI>> serversInfo = new ConcurrentHashMap<>();
 
-	Discovery() {
+	public Discovery() {
 	}
 	
 	/**
