@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 public class Discovery {
 	private static Logger Log = Logger.getLogger(Discovery.class.getName());
 
-	private static Discovery singleton = null;
+	private static Discovery instance;
 
 	static {
 		// addresses some multicast issues on some TCP/IP stacks
@@ -45,17 +45,19 @@ public class Discovery {
 	private static final String DELIMITER = "\t";
 
 	// Stores the information about different servers
-	Map<String, List<URI>> serversInfo = new ConcurrentHashMap<>();
+	private Map<String, ArrayList<URI>> serversInfo = new ConcurrentHashMap<>();
 
-	@Singleton
-	public Discovery() {
-	}
+	private Discovery() {}
 
 	public static Discovery getInstance() {
-		if (singleton == null)
-			singleton = new Discovery();
-
-		return singleton;
+		if(instance == null) {
+			synchronized(Discovery.class) {
+				if(instance == null) {
+					instance = new Discovery();
+				}
+			}
+		}
+		return instance;
 	}
 	
 	/**
@@ -93,7 +95,7 @@ public class Discovery {
 	 * @return the discovery results as an array
 	 */
 	
-	public void listener(String serviceName) throws URISyntaxException {
+	public void listener() throws URISyntaxException {
 		Log.info(String.format("Starting discovery on multicast group: %s, port: %d\n", DISCOVERY_ADDR.getAddress(), DISCOVERY_ADDR.getPort()));
 
 		final int MAX_DATAGRAM_SIZE = 65536;
@@ -112,30 +114,26 @@ public class Discovery {
 								pkt.getAddress().getHostAddress(), msg);
 						var tokens = msg.split(DELIMITER);
 						if (tokens.length == 2) {
-							//TODO: to complete by recording the received information from the other node.
+
+							String serviceName = tokens[0];
 
 							if (!serversInfo.containsKey(serviceName)) {
-								List<URI> uriList = new ArrayList<>();
+								ArrayList<URI> uriList = new ArrayList<>();
 								serversInfo.put(serviceName, uriList);
 							}
 
 							URI uri = new URI(tokens[1]+"#"+System.currentTimeMillis());
 
-							int oldPos = getIndexURI(serviceName, uri.getHost());
-							if (oldPos > -1) {
-								String oldStr = serversInfo.get(serviceName).get(oldPos).toString();
-								String uriParts[] = oldStr.split("#");
+							int pos = getIndexURI(serviceName, uri.toString().split("#")[0]);
+							if (pos > -1) {
+								String oldStr = serversInfo.get(serviceName).get(pos).toString();
 
-								URI newURI = new URI(uriParts[0]+"#"+uri.getFragment());
+								URI newURI = new URI(oldStr.split("#")[0]+"#"+uri.getFragment());
 
-								serversInfo.get(serviceName).set(oldPos, newURI);
+								serversInfo.get(serviceName).set(pos, newURI);
 
 							}
 							else serversInfo.get(serviceName).add(uri);
-
-							//prints which URI are being stored
-							for (URI uriOf : knownUrisOf(serviceName))
-								System.out.println(uriOf);
 
 						}
 					} catch (IOException e) {
@@ -163,7 +161,7 @@ public class Discovery {
 
 	private int getIndexURI(String serviceName, String hostname) {
 		for (int i = 0; i < serversInfo.get(serviceName).size(); i++) {
-			if (hostname.equals(serversInfo.get(serviceName).get(i).getHost()))
+			if (hostname.equals(serversInfo.get(serviceName).get(i).toString().split("#")[0]))
 				return i;
 		}
 		return -1;
@@ -176,7 +174,7 @@ public class Discovery {
 	 * @return an array of URI with the service instances discovered. 
 	 * 
 	 */
-	public URI[] knownUrisOf(String serviceName) throws URISyntaxException {
+	/*public URI[] knownUrisOf(String serviceName) throws URISyntaxException {
 		URI[] uris;
 		if (serversInfo.containsKey(serviceName)) {
 			List<URI> uriList = serversInfo.get(serviceName);
@@ -185,13 +183,27 @@ public class Discovery {
 					uriList.remove(i);
 			}
 			uris = new URI[uriList.size()];
-			serversInfo.get(serviceName).toArray(uris);
+			return serversInfo.get(serviceName).toArray(uris);
 		}
-		else
-			return new URI[0];
 
-		return uris;
-	}	
+		return null;
+	}*/
+
+	public URI[] knownUrisOf(String serviceName) throws URISyntaxException {
+		if (!serversInfo.containsKey(serviceName)) {
+			return null;         
+		}         
+		else{             
+			ArrayList<URI> help = serversInfo.get(serviceName);             
+			if(help == null ) return null;              
+			URI[] aux = new URI[help.size()];             
+			for(int i = 0; i < help.size(); i++){                 
+				//pode haver erro aqui                 
+				aux[i] = new URI(help.get(i).toString().split("#")[0]);   
+			}             
+			return aux;         
+		}     
+	}
 
 	private void joinGroupInAllInterfaces(MulticastSocket ms) throws SocketException {
 		Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
@@ -210,6 +222,8 @@ public class Discovery {
 	 */
 	public void start(String serviceName, String serviceURI) throws URISyntaxException {
 		announce(serviceName, serviceURI);
-		listener(serviceName);
+		listener();
 	}
+
+ 
 }

@@ -1,7 +1,12 @@
 package tp1.server;
 
+import tp1.server.resources.*;
+
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 import tp1.server.resources.DirectoryResource;
 import tp1.server.resources.UsersResource;
 import tp1.server.util.GenericExceptionMapper;
@@ -28,20 +33,27 @@ public class RESTDirServer {
             Debug.setLogLevel( Level.INFO, Debug.SD2122 );
 
             ResourceConfig config = new ResourceConfig();
-            config.register(DirectoryResource.class);
-            config.register(UsersResource.class);
+            
             //config.register(CustomLoggingFilter.class);
-            config.register(GenericExceptionMapper.class);
+            //config.register(GenericExceptionMapper.class);
 
             String ip = InetAddress.getLocalHost().getHostAddress();
             String serverURI = String.format(SERVER_URI_FMT, ip, PORT);
+
+            Discovery discovery = Discovery.getInstance();
+            discovery.start(SERVICE, serverURI);
+            config.register(DirectoryResource.class);
+
             JdkHttpServerFactory.createHttpServer( URI.create(serverURI), config );
+
+            
+
 
             Log.info(String.format("%s Server ready @ %s\n", SERVICE, serverURI));
 
             //More code can be executed here...
 
-            Discovery.getInstance().start(SERVICE, serverURI);
+            
             
 
         } catch( Exception e) {

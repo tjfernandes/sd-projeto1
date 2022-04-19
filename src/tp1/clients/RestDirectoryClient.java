@@ -35,8 +35,11 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
                     .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
-        if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
+        if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() ) {
+            System.out.println("YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEY");
             return r.readEntity(FileInfo.class);
+        }
+            
         else
             System.out.println("Error, HTTP error status: " + r.getStatus() );
 
@@ -60,7 +63,18 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
 
     @Override
     public byte[] getFile(String filename, String userId, String accUserId, String password) {
-        return new byte[0];
+        Response r = target.path(userId).path(filename)
+            	    .queryParam("password", password)
+                    .queryParam("accUserId", accUserId).request()
+                    .accept(MediaType.APPLICATION_OCTET_STREAM)
+                    .get();
+
+        if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
+            return r.readEntity(byte[].class);
+        else 
+            System.out.println("Error, HTTP error status: " + r.getStatus() );
+            
+        return null;
     }
 
     @Override

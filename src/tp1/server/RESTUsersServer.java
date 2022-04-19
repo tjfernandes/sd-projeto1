@@ -36,15 +36,12 @@ public class RESTUsersServer {
 		
 		String ip = InetAddress.getLocalHost().getHostAddress();
 		String serverURI = String.format(SERVER_URI_FMT, ip, PORT);
-		JdkHttpServerFactory.createHttpServer( URI.create(serverURI), config);
-	
-		Log.info(String.format("%s Server ready @ %s\n",  SERVICE, serverURI));
-		
-		//More code can be executed here...
 
 		Discovery.getInstance().start(SERVICE, serverURI);
 
-
+		JdkHttpServerFactory.createHttpServer( URI.create(serverURI), config);
+	
+		Log.info(String.format("%s Server ready @ %s\n",  SERVICE, serverURI));
 
 		} catch( Exception e) {
 			Log.severe(e.getMessage());

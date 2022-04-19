@@ -4,6 +4,8 @@ import tp1.api.service.rest.RestFiles;
 import tp1.server.Discovery;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -12,6 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
+
+@Singleton
 public class FilesResource implements RestFiles {
 
     private static final Logger Log = Logger.getLogger(FilesResource.class.getName());
@@ -24,39 +31,13 @@ public class FilesResource implements RestFiles {
     public void writeFile(String fileId, byte[] data, String token) throws IOException {
         Log.info("writeFile: " + fileId);
 
-        Discovery discovery = new Discovery();
-        
-        try {
-            URI[] serversUri = discovery.knownUrisOf("files");
+        File file = new File(fileId);
+        FileOutputStream fO = new FileOutputStream(file);
 
-            while (serversUri == null)
-                serversUri = discovery.knownUrisOf("files");
-        
-            URI serverUri = serversUri[0];
+        fO.write(data);
+        fO.close();
 
-
-            for(URI uri : serversUri) {
-                String[] segments = uri.getPath().split("/");
-                String fId = segments[segments.length - 1];
-                if(fileId.equals(fId))
-                    serverUri = uri;
-            }
-            
-            File file = new File(serverUri);
-            FileOutputStream fileStream = new FileOutputStream(file);
-            fileStream.write(data);
-            
-            files.put(fileId, file);
-    
-            
-            
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        // serversUri + /fileId
-        // nhtoo://ds89123679:8080/rest/files
+        files.put(fileId, file);
     }    
 
     @Override
@@ -66,6 +47,26 @@ public class FilesResource implements RestFiles {
 
     @Override
     public byte[] getFile(String fileId, String token) {
-        return new byte[0];
+        Log.info("getFile: " + fileId);
+
+
+        File file = files.get(fileId);
+
+        if (file == null)
+            throw new WebApplicationException(Status.NOT_FOUND);
+
+        FileInputStream fI;
+        byte[] data = new byte[(int)file.length()];;
+        try {
+            fI = new FileInputStream(file);
+
+            fI.read(data);
+            fI.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return data;
     }
 }

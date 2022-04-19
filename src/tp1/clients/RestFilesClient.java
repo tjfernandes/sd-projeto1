@@ -5,6 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 
+import javax.print.attribute.standard.Media;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
@@ -15,7 +19,7 @@ public class RestFilesClient extends RestClient implements RestFiles {
 
     final WebTarget target;
 
-	RestFilesClient( URI serverURI ) {
+	public RestFilesClient( URI serverURI ) {
 		super( serverURI );
 		target = client.target( serverURI ).path( RestFiles.PATH );
 	}
@@ -29,8 +33,11 @@ public class RestFilesClient extends RestClient implements RestFiles {
 
 		if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
             System.out.println("File written in server: " + target.path(fileId).getUri());
-        else
+        else {
             System.out.println("Error, HTTP error status: " + r.getStatus() );
+        }
+            
+            
     }
 
     @Override
