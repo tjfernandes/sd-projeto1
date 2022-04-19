@@ -41,7 +41,7 @@ public class DirectoryResource implements RestDirectory {
     
         try {
             var usersUri = discovery.knownUrisOf("users");
-            while (usersUri.length == 0)
+            while (usersUri == null)
                 usersUri = discovery.knownUrisOf("users");
 
             
@@ -49,7 +49,7 @@ public class DirectoryResource implements RestDirectory {
             
             for( URI uri: usersUri ) {
                 if (user == null) {
-                    user = (new RestUsersClient(URI.create("http://172.18.0.3:8080/rest"))).getUser(userId, password);
+                    user = (new RestUsersClient(uri).getUser(userId, password));
                 }
             }
 

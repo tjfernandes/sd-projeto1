@@ -40,8 +40,7 @@ public class RESTFilesServer {
 
             //More code can be executed here...
 
-            Discovery discovery = new Discovery();
-            discovery.announce(SERVICE, serverURI);
+            Discovery.getInstance().announce(SERVICE, serverURI);
 
         } catch( Exception e) {
             Log.severe(e.getMessage());

@@ -42,8 +42,7 @@ public class RESTUsersServer {
 		
 		//More code can be executed here...
 
-		Discovery discovery = new Discovery();
-		discovery.start(SERVICE, serverURI);
+		Discovery.getInstance().start(SERVICE, serverURI);
 
 
 
