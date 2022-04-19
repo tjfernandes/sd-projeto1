@@ -6,9 +6,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import tp1.api.FileInfo;
 import tp1.api.service.rest.RestDirectory;
-import tp1.api.service.rest.RestFiles;
-import tp1.clients.RestClient;
-import tp1.server.Discovery;
 
 import java.util.logging.Logger;
 import java.net.URI;
@@ -20,7 +17,7 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
 
     final WebTarget target;
 
-    RestDirectoryClient( URI serverURI ) {
+    public RestDirectoryClient( URI serverURI ) {
         super( serverURI );
         target = client.target( serverURI ).path( RestDirectory.PATH );
     }

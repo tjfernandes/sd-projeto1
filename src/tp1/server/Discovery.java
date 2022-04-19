@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 public class Discovery {
 	private static Logger Log = Logger.getLogger(Discovery.class.getName());
 
+	private static Discovery singleton = null;
+
 	static {
 		// addresses some multicast issues on some TCP/IP stacks
 		System.setProperty("java.net.preferIPv4Stack", "true");
@@ -45,7 +47,15 @@ public class Discovery {
 	// Stores the information about different servers
 	Map<String, List<URI>> serversInfo = new ConcurrentHashMap<>();
 
+	@Singleton
 	public Discovery() {
+	}
+
+	public static Discovery getInstance() {
+		if (singleton == null)
+			singleton = new Discovery();
+
+		return singleton;
 	}
 	
 	/**
@@ -178,7 +188,7 @@ public class Discovery {
 			serversInfo.get(serviceName).toArray(uris);
 		}
 		else
-			return null;
+			return new URI[0];
 
 		return uris;
 	}	

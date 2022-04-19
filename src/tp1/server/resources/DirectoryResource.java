@@ -7,7 +7,13 @@ import tp1.api.FileInfo;
 import tp1.api.User;
 import tp1.api.service.rest.RestDirectory;
 import tp1.api.service.rest.RestFiles;
+import tp1.clients.GetUserClient;
+import tp1.clients.RestUsersClient;
+import tp1.server.Discovery;
+
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +23,7 @@ import java.util.logging.Logger;
 @Singleton
 public class DirectoryResource implements RestDirectory {
 
-    private final UsersResource usersResource = new UsersResource();
-    private final FilesResource filesResource = new FilesResource();
+    private RestUsersClient usersClient;
 
     private Map<User, List<FileInfo>> userFiles = new HashMap<>();
 
@@ -30,10 +35,35 @@ public class DirectoryResource implements RestDirectory {
     public FileInfo writeFile(String filename, byte[] data, String userId, String password) {
         Log.info("Writing " + filename + " of user " + userId + "...");
 
-        User u = usersResource.getUser(userId, password);
+        Discovery discovery = Discovery.getInstance();
 
-        if (!userFiles.containsKey(u))
-            userFiles.put(u, new ArrayList<FileInfo>());
+        User user = null;
+    
+        try {
+            var usersUri = discovery.knownUrisOf("users");
+            while (usersUri.length == 0)
+                usersUri = discovery.knownUrisOf("users");
+
+            
+
+            
+            for( URI uri: usersUri ) {
+                if (user == null) {
+                    user = (new RestUsersClient(URI.create("http://172.18.0.3:8080/rest"))).getUser(userId, password);
+                }
+            }
+
+            
+            
+        } catch (URISyntaxException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        
+        
+        if (!userFiles.containsKey(user)) {}
+            userFiles.put(user, new ArrayList<FileInfo>());
+        
 
         FileInfo fileInfo = new FileInfo();
         fileInfo.setOwner(userId);
@@ -41,7 +71,7 @@ public class DirectoryResource implements RestDirectory {
         String fileId = filename + "-" + userId;
         fileInfo.setFileURL(RestFiles.PATH + "/" + fileId);
 
-        List<FileInfo> filesList = userFiles.get(u);
+        List<FileInfo> filesList = userFiles.get(user);
 
         boolean fileExists = false;
         for(FileInfo fInfo: filesList) {
@@ -55,12 +85,12 @@ public class DirectoryResource implements RestDirectory {
         if (!fileExists)
             filesList.add(fileInfo);
         
-        try {
-            filesResource.writeFile(fileId, data, "token");
+        /*try {
+            //filesResource.writeFile(fileId, data, "token");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
+        }*/
             
         return null;
     }

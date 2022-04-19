@@ -29,6 +29,7 @@ public class RESTDirServer {
 
             ResourceConfig config = new ResourceConfig();
             config.register(DirectoryResource.class);
+            config.register(UsersResource.class);
             //config.register(CustomLoggingFilter.class);
             config.register(GenericExceptionMapper.class);
 
@@ -42,13 +43,7 @@ public class RESTDirServer {
 
             Discovery discovery = new Discovery();
             discovery.start(SERVICE, serverURI);
-
-            URI[] usersUris = discovery.knownUrisOf("users");
-            while (usersUris == null) {
-                usersUris = discovery.knownUrisOf("users");
-            }
-
-
+            
 
         } catch( Exception e) {
             Log.severe(e.getMessage());
