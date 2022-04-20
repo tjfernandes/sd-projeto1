@@ -27,17 +27,10 @@ public class RestFilesClient extends RestClient implements RestFiles {
     @Override
     public void writeFile(String fileId, byte[] data, String token) throws IOException {
 
-        Response r = target.path(fileId).request()
-					.accept(MediaType.APPLICATION_JSON)
-					.post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
+        target.path(fileId).request()
+            .accept(MediaType.APPLICATION_JSON)
+            .post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
-		if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
-            System.out.println("File written in server: " + target.path(fileId).getUri());
-        else {
-            System.out.println("Error, HTTP error status: " + r.getStatus() );
-        }
-            
-            
     }
 
     @Override
@@ -48,7 +41,15 @@ public class RestFilesClient extends RestClient implements RestFiles {
 
     @Override
     public byte[] getFile(String fileId, String token) {
-        // TODO Auto-generated method stub
+        
+        Response r = target.path(fileId).request()
+                    .accept(MediaType.APPLICATION_OCTET_STREAM)
+                    .get();
+
+        if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
+            return r.readEntity(byte[].class);
+        else
+            System.out.println("Error, HTTP error status: " + r.getStatus() );
         return null;
     }
 

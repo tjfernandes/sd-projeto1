@@ -6,6 +6,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import tp1.api.FileInfo;
 import tp1.api.service.rest.RestDirectory;
+import tp1.api.service.rest.RestFiles;
 
 import java.util.logging.Logger;
 import java.net.URI;
@@ -36,12 +37,12 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
                     .post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
         if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() ) {
-            System.out.println("YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEY");
+            System.out.println("\n\nEntrei write\n\n");
             return r.readEntity(FileInfo.class);
         }
             
         else
-            System.out.println("Error, HTTP error status: " + r.getStatus() );
+            System.out.println("Error, HTTP error status: Write" + r.getStatus() );
 
         return null;
     }
@@ -63,22 +64,30 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
 
     @Override
     public byte[] getFile(String filename, String userId, String accUserId, String password) {
+        return super.reTry( () -> clt_getFile(filename, userId, accUserId, password));
+    }
+
+    @Override
+    public List<FileInfo> lsFile(String userId, String password) {
+        return null;
+    }
+
+    private byte[] clt_getFile(String filename, String userId, String accUserId, String password) {
+
         Response r = target.path(userId).path(filename)
             	    .queryParam("password", password)
                     .queryParam("accUserId", accUserId).request()
                     .accept(MediaType.APPLICATION_OCTET_STREAM)
                     .get();
 
-        if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() )
+        if( r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() ) {
+            System.out.println("\n\nEntrei get\n\n");
             return r.readEntity(byte[].class);
-        else 
-            System.out.println("Error, HTTP error status: " + r.getStatus() );
             
-        return null;
-    }
-
-    @Override
-    public List<FileInfo> lsFile(String userId, String password) {
+        }
+        else 
+            System.out.println("Error, HTTP error status: Get" + r.getStatus() );
+            
         return null;
     }
 }

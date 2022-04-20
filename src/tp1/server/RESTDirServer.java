@@ -5,11 +5,7 @@ import tp1.server.resources.*;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
 import tp1.server.resources.DirectoryResource;
-import tp1.server.resources.UsersResource;
-import tp1.server.util.GenericExceptionMapper;
 import util.Debug;
 
 import java.net.InetAddress;

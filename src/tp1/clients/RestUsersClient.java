@@ -2,6 +2,7 @@ package tp1.clients;
 
 import java.net.URI;
 import java.util.List;
+import java.util.logging.Logger;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
@@ -15,6 +16,8 @@ import tp1.api.service.rest.RestUsers;
 public class RestUsersClient extends RestClient implements RestUsers {
 
 	final WebTarget target;
+
+	private static final Logger Log = Logger.getLogger(RestUsersClient.class.getName());
 	
 	public RestUsersClient( URI serverURI ) {
 		super( serverURI );

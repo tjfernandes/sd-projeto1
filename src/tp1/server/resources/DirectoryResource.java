@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 @Singleton
 public class DirectoryResource implements RestDirectory {
 
-    private Map<String, List<FileInfo>> userFiles = new HashMap<>();
+    private static Map<String, List<FileInfo>> userFiles = new HashMap<>();
 
     private static final Logger Log = Logger.getLogger(DirectoryResource.class.getName());
 
@@ -35,10 +35,14 @@ public class DirectoryResource implements RestDirectory {
         Log.info("Writing " + filename + " of user " + userId + "...");
 
         User user = null;
-    
-        try {
 
-            Discovery discovery = Discovery.getInstance();
+        URI[] filesUris = null;
+    
+        Discovery discovery = Discovery.getInstance();
+
+        String fileId = String.format("%s-%s", filename, userId);
+
+        try {
 
             var usersUri = discovery.knownUrisOf("users");
             while(usersUri == null)
@@ -49,22 +53,34 @@ public class DirectoryResource implements RestDirectory {
                     user = (new RestUsersClient(uri).getUser(userId, password));
                 }
             }
-
         } catch (URISyntaxException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+
+        try {
+
+            filesUris = discovery.knownUrisOf("files");
+            while(filesUris == null)
+                filesUris = discovery.knownUrisOf("files");
+
+            // posteriormente definir o server de files
+            new RestFilesClient(filesUris[0]).writeFile(fileId, data, "token");
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+           
         
         
-        if (!userFiles.containsKey(userId)) {}
+        if (!userFiles.containsKey(userId))
             userFiles.put(userId, new ArrayList<FileInfo>());
         
 
         FileInfo fileInfo = new FileInfo();
         fileInfo.setOwner(userId);
         fileInfo.setFilename(filename);
-        String fileId = String.format("%s-%s", filename, userId);
-        fileInfo.setFileURL(RestFiles.PATH + "/" + fileId);
+        
+        fileInfo.setFileURL(filesUris[0] + RestFiles.PATH + "/" + fileId);
 
         List<FileInfo> filesList = userFiles.get(userId);
 
@@ -77,22 +93,10 @@ public class DirectoryResource implements RestDirectory {
             }  
         }
 
-        if (!fileExists)
+        if (!fileExists) {
             filesList.add(fileInfo);
-        
-        try {
-            Discovery discovery = Discovery.getInstance();
-
-            var filesUris = discovery.knownUrisOf("files");
-            while(filesUris == null)
-                filesUris = discovery.knownUrisOf("files");
-
-            // posteriormente definir o server de files
-            new RestFilesClient(filesUris[0]).writeFile(fileId, data, "token");
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
         }
-            
+         
         return fileInfo;
     }
 
@@ -114,11 +118,10 @@ public class DirectoryResource implements RestDirectory {
     @Override
     public byte[] getFile(String filename, String userId, String accUserId, String password) {
         Log.info("Getting file " + filename + " from user " + userId + "...");
-
         Discovery discovery = Discovery.getInstance();
 
         User user = null;
-    
+        
         try {
 
             var usersUri = discovery.knownUrisOf("users");
@@ -127,7 +130,7 @@ public class DirectoryResource implements RestDirectory {
             
             for( URI uri: usersUri ) {
                 if (user == null) {
-                    user = (new RestUsersClient(uri).getUser(userId, password));
+                    user = (new RestUsersClient(uri).getUser(accUserId, password));
                 }
             }
 
@@ -135,53 +138,39 @@ public class DirectoryResource implements RestDirectory {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-
+        
         List<FileInfo> files = userFiles.get(userId);
+        
         if (files == null)
-            throw new WebApplicationException(Status.NOT_FOUND);
+           throw new WebApplicationException(Status.NOT_FOUND);
 
         String fileURL = "";
         boolean fileExists = false;
         boolean isShared = false;
+        Response r = null;
         for (FileInfo fi : files) {
             if (fi.getFilename().equals(filename)) {
                 fileExists = true;
                 fileURL = fi.getFileURL();
-                if (fi.getSharedWith().contains(accUserId))
+                if (fi.getOwner().equals(accUserId)) {
                     isShared = true;
+                    r = Response.temporaryRedirect(URI.create(fileURL)).build();
+                }
+                else if (fi.getSharedWith() != null) 
+                    if (fi.getSharedWith().contains(accUserId) || fi.getOwner().equals(accUserId)) {
+                        isShared = true;
+                        r = Response.temporaryRedirect(URI.create(fileURL)).build();
+                    }
                 break;
-            }
-                
+            }      
         }
 
         if (!fileExists)
             throw new WebApplicationException(Status.NOT_FOUND);
-
-        if (!isShared && (!userId.equals(accUserId)))
+        if (!isShared)
             throw new WebApplicationException(Status.FORBIDDEN);
-
-        /*byte[] fileData = null;
-        String fileId = filename + "-" + userId;
-
-        try {
-            var filesUris = discovery.knownUrisOf("files");
-            while (filesUris == null)
-                discovery.knownUrisOf("files");
-                
-            for( URI uri: filesUris ) {
-                if (fileData == null) {
-                    fileData = (new RestFilesClient(uri).getFile(fileId, "token"));
-                }
-            }
-            
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }*/
-
-
-        URI redirectUri = URI.create(fileURL);
-
-        throw new WebApplicationException(Response.temporaryRedirect(redirectUri).build());
+        else
+            throw new WebApplicationException(r);
     }
 
     @Override

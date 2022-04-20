@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,7 +24,7 @@ public class FilesResource implements RestFiles {
 
     private static final Logger Log = Logger.getLogger(FilesResource.class.getName());
 
-    Map<String, File> files = new HashMap<String, File>();
+    private static Map<String, File> files = new HashMap<String, File>();
 
     FilesResource() {}
 
@@ -32,10 +33,10 @@ public class FilesResource implements RestFiles {
         Log.info("writeFile: " + fileId);
 
         File file = new File(fileId);
-        FileOutputStream fO = new FileOutputStream(file);
-
-        fO.write(data);
-        fO.close();
+        
+        FileOutputStream fOutput = new FileOutputStream(file);
+        fOutput.write(data);
+        fOutput.close();
 
         files.put(fileId, file);
     }    
@@ -57,9 +58,9 @@ public class FilesResource implements RestFiles {
 
         FileInputStream fI;
         byte[] data = new byte[(int)file.length()];;
+
         try {
             fI = new FileInputStream(file);
-
             fI.read(data);
             fI.close();
         } catch (IOException e) {
