@@ -51,6 +51,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 
 
 	private String clt_createUser( User user) {
+
 		Response r = target.request()
 				.accept(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(user, MediaType.APPLICATION_JSON));

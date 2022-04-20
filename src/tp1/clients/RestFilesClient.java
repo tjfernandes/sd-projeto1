@@ -1,13 +1,7 @@
 package tp1.clients;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-
-import javax.print.attribute.standard.Media;
-
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
@@ -26,11 +20,17 @@ public class RestFilesClient extends RestClient implements RestFiles {
 
     @Override
     public void writeFile(String fileId, byte[] data, String token) throws IOException {
+       
+        super.reTry(() -> {
+            clt_writeFile(fileId, data, token);
+            return null;
+        });
+    }
 
-        target.path(fileId).request()
-            .accept(MediaType.APPLICATION_JSON)
-            .post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
-
+    private void clt_writeFile(String fileId, byte[] data, String token) {
+        target.request()
+        .accept(MediaType.APPLICATION_JSON)
+        .post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
     }
 
     @Override
@@ -41,7 +41,7 @@ public class RestFilesClient extends RestClient implements RestFiles {
 
     @Override
     public byte[] getFile(String fileId, String token) {
-        
+
         Response r = target.path(fileId).request()
                     .accept(MediaType.APPLICATION_OCTET_STREAM)
                     .get();

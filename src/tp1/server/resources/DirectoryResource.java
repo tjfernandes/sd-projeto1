@@ -11,6 +11,7 @@ import tp1.api.service.rest.RestFiles;
 import tp1.clients.RestFilesClient;
 import tp1.clients.RestUsersClient;
 import tp1.server.Discovery;
+import tp1.server.RESTDirServer;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,7 +27,7 @@ public class DirectoryResource implements RestDirectory {
 
     private static Map<String, List<FileInfo>> userFiles = new HashMap<>();
 
-    private static final Logger Log = Logger.getLogger(DirectoryResource.class.getName());
+    private static final Logger Log = Logger.getLogger(RESTDirServer.class.getName());
 
     public DirectoryResource() {}
 
@@ -50,13 +51,15 @@ public class DirectoryResource implements RestDirectory {
             
             for( URI uri: usersUri ) {
                 if (user == null) {
-                    user = (new RestUsersClient(uri).getUser(userId, password));
+                    user = ((new RestUsersClient(uri)).getUser(userId, password));
                 }
             }
         } catch (URISyntaxException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+
+        URI fileUri = null;
 
         try {
 
@@ -65,12 +68,13 @@ public class DirectoryResource implements RestDirectory {
                 filesUris = discovery.knownUrisOf("files");
 
             // posteriormente definir o server de files
-            new RestFilesClient(filesUris[0]).writeFile(fileId, data, "token");
+            fileUri = filesUris[0];
+            RestFilesClient fileClient = new RestFilesClient(fileUri);
+            fileClient.writeFile(fileId, data, "token");
+            
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
-           
-        
         
         if (!userFiles.containsKey(userId))
             userFiles.put(userId, new ArrayList<FileInfo>());
@@ -79,15 +83,14 @@ public class DirectoryResource implements RestDirectory {
         FileInfo fileInfo = new FileInfo();
         fileInfo.setOwner(userId);
         fileInfo.setFilename(filename);
-        
-        fileInfo.setFileURL(filesUris[0] + RestFiles.PATH + "/" + fileId);
+        String path = String.format("%s%s/%s", fileUri, RestFiles.PATH, fileId);
+        fileInfo.setFileURL(path);
 
         List<FileInfo> filesList = userFiles.get(userId);
-
         boolean fileExists = false;
         for(FileInfo fInfo: filesList) {
             if (fInfo.getFilename().equals(filename)) {
-                fileInfo = fInfo;
+                fInfo = fileInfo;
                 fileExists = true;
                 break;
             }  
@@ -140,9 +143,6 @@ public class DirectoryResource implements RestDirectory {
         }
         
         List<FileInfo> files = userFiles.get(userId);
-        
-        if (files == null)
-           throw new WebApplicationException(Status.NOT_FOUND);
 
         String fileURL = "";
         boolean fileExists = false;
@@ -164,6 +164,7 @@ public class DirectoryResource implements RestDirectory {
                 break;
             }      
         }
+        
 
         if (!fileExists)
             throw new WebApplicationException(Status.NOT_FOUND);

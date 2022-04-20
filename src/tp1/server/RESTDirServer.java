@@ -36,8 +36,7 @@ public class RESTDirServer {
             String ip = InetAddress.getLocalHost().getHostAddress();
             String serverURI = String.format(SERVER_URI_FMT, ip, PORT);
 
-            Discovery discovery = Discovery.getInstance();
-            discovery.start(SERVICE, serverURI);
+            Discovery.getInstance().start(SERVICE, serverURI);
             config.register(DirectoryResource.class);
 
             JdkHttpServerFactory.createHttpServer( URI.create(serverURI), config );

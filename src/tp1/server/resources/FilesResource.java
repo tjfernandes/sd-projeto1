@@ -32,6 +32,12 @@ public class FilesResource implements RestFiles {
     public void writeFile(String fileId, byte[] data, String token) throws IOException {
         Log.info("writeFile: " + fileId);
 
+        System.out.println("\n\n\nCONAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n\n\n");
+
+        String test = "ola";
+        if (test.equals("ola"))
+            throw new WebApplicationException(Status.EXPECTATION_FAILED);
+
         File file = new File(fileId);
         
         FileOutputStream fOutput = new FileOutputStream(file);
@@ -49,7 +55,7 @@ public class FilesResource implements RestFiles {
     @Override
     public byte[] getFile(String fileId, String token) {
         Log.info("getFile: " + fileId);
-
+        
 
         File file = files.get(fileId);
 
